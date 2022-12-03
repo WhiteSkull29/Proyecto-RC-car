@@ -12,15 +12,25 @@
 Servo servo;
 
 //pines de Driver L293n
-#define In1 18 
-#define In2 19
-//In1 es In1 y 2 en el driver, In 2 es 2 y 4
+#define In1 18  
+#define In2 19  //In1 es In1 y 2 en el driver, In 2 es 2 y 4
+//pines luces
 #define LuzD 32
 #define LuzT 33
 #define Guiño_L 25
 #define Guiño_R 26
-bool presionado = false;
+bool presionado = false; //Bool para cambio de estado de las luces
+unsigned long timeOn = 500; //el tiempo de millis
+unsigned long changeTime = 0;
+int grados = 0;
 
+void Giro(int LED) {
+  if (millis() >= changeTime)  {
+    presionado = !presionado;
+    digitalWrite(LED, presionado);
+    changeTime = millis() + timeOn;
+  }
+}
 void Luz(int led) {
 presionado = !presionado;
 delayMicroseconds(100);
@@ -35,7 +45,7 @@ else digitalWrite(led, LOW);
 void direccion() {
   int CT3;
   CT3 = PS4.LStickX();
-  int grados = map(CT3, -128, 128, 45, 135);
+  int grados = map(CT3, -128, 128, 35, 145); //-128 y 128 es el rango de joystick, 35 y 145 son los grados del servo
   Serial.printf("Left Stick x at %d\n", CT3);
   Serial.printf("servo grados:  %d\n", grados);
   servo.write(grados);
@@ -89,6 +99,12 @@ void loop() {
     }
     if (!PS4.Square()){
       Luz(32);
+    }
+    if (grados > 100){
+      Giro(25);
+    }
+    if (grados < 80){
+      Giro(26);
     }
       stop();
     
